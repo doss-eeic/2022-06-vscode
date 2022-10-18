@@ -320,7 +320,7 @@ registerAction2(class GoToDefinitionAction extends DefinitionAction {
 
 	constructor() {
 		super({
-			openToSide: false,
+			openToSide: true,
 			openInPeek: false,
 			muteMessage: false
 		}, {
