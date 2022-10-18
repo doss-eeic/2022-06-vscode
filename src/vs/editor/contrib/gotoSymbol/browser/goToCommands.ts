@@ -278,8 +278,8 @@ const goToDefinitionKb = isWeb && !isStandalone()
 	: KeyCode.F12;
 
 const openDefinitionToSideKb = isWeb && isStandalone()
-	? KeyCode.KeyK | KeyCode.F12
-	: KeyMod.CtrlCmd | KeyCode.KeyK | KeyCode.F12;
+	? KeyCode.KeyK
+	: KeyMod.CtrlCmd | KeyCode.KeyK;
 
 registerAction2(class GoToDefinitionAction extends DefinitionAction {
 
