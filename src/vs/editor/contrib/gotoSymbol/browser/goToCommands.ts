@@ -277,6 +277,10 @@ const goToDefinitionKb = isWeb && !isStandalone()
 	? KeyMod.CtrlCmd | KeyCode.F12
 	: KeyCode.F12;
 
+const openDefinitionToSideKb = isWeb && isStandalone()
+	? KeyCode.KeyK | KeyCode.F12
+	: KeyMod.CtrlCmd | KeyCode.KeyK | KeyCode.F12;
+
 registerAction2(class GoToDefinitionAction extends DefinitionAction {
 
 	static readonly id = 'editor.action.revealDefinition';
@@ -336,7 +340,7 @@ registerAction2(class OpenDefinitionToSideAction extends DefinitionAction {
 				EditorContextKeys.isInWalkThroughSnippet.toNegated()),
 			keybinding: {
 				when: EditorContextKeys.editorTextFocus,
-				primary: KeyChord(KeyMod.CtrlCmd | KeyCode.KeyK, goToDefinitionKb),
+				primary: openDefinitionToSideKb,
 				weight: KeybindingWeight.EditorContrib
 			},
 			menu: [{
