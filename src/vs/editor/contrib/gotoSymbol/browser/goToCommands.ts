@@ -277,43 +277,6 @@ const goToDefinitionKb = isWeb && !isStandalone()
 	? KeyMod.CtrlCmd | KeyCode.F12
 	: KeyCode.F12;
 
-registerAction2(class GoToDefinitionNewTabAction extends DefinitionAction {
-	static readonly id = 'editor.action.revealDefinitionNewTab';
-
-	constructor() {
-		super({
-			openToSide: false,
-			openInPeek: false,
-			muteMessage: false
-		}, {
-			id: GoToDefinitionNewTabAction.id,
-			title: {
-				value: nls.localize('actions.goToDeclNewTab.label', "Go to Definition / New Tab"),
-				original: 'Go to Definition/New Tab',
-				mnemonicTitle: nls.localize({ key: 'miGotoDefinitionNewTab', comment: ['&& denotes a mnemonic'] }, "Go to &&Definition/New Tab")
-			},
-			precondition: ContextKeyExpr.and(
-				EditorContextKeys.hasDefinitionProvider,
-				EditorContextKeys.isInWalkThroughSnippet.toNegated()),
-			keybinding: {
-				when: EditorContextKeys.editorTextFocus,
-				primary: goToDefinitionKb,
-				weight: KeybindingWeight.EditorContrib
-			},
-			menu: [{
-				id: MenuId.EditorContext,
-				group: 'navigation',
-				order: 1.1
-			}, {
-				id: MenuId.MenubarGoMenu,
-				group: '4_symbol_nav',
-				order: 2,
-			}]
-		});
-		CommandsRegistry.registerCommandAlias('editor.action.revealDefinitionNewTab', GoToDefinitionNewTabAction.id);
-	}
-});
-
 registerAction2(class GoToDefinitionAction extends DefinitionAction {
 
 	static readonly id = 'editor.action.revealDefinition';
@@ -364,7 +327,7 @@ registerAction2(class OpenDefinitionToSideAction extends DefinitionAction {
 		}, {
 			id: OpenDefinitionToSideAction.id,
 			title: {
-				value: nls.localize('actions.goToDeclToSide.label', "Open Definition to  Side"),
+				value: nls.localize('actions.goToDeclToSide.label', "Open Definition to Side"),
 				original: 'Open Definition to Side',
 				mnemonicTitle: nls.localize({ key: 'miOpenDefinitionToSideAction', comment: ['&& denotes a mnemonic'] }, "Open &&Definition to Side")
 			},
