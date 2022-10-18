@@ -364,8 +364,9 @@ registerAction2(class OpenDefinitionToSideAction extends DefinitionAction {
 		}, {
 			id: OpenDefinitionToSideAction.id,
 			title: {
-				value: nls.localize('actions.goToDeclToSide.label', "Open Definition to the Side"),
-				original: 'Open Definition to the Side'
+				value: nls.localize('actions.goToDeclToSide.label', "Open Definition to  Side"),
+				original: 'Open Definition to Side',
+				mnemonicTitle: nls.localize({ key: 'miOpenDefinitionToSideAction', comment: ['&& denotes a mnemonic'] }, "Open &&Definition to Side")
 			},
 			precondition: ContextKeyExpr.and(
 				EditorContextKeys.hasDefinitionProvider,
@@ -374,7 +375,16 @@ registerAction2(class OpenDefinitionToSideAction extends DefinitionAction {
 				when: EditorContextKeys.editorTextFocus,
 				primary: KeyChord(KeyMod.CtrlCmd | KeyCode.KeyK, goToDefinitionKb),
 				weight: KeybindingWeight.EditorContrib
-			}
+			},
+			menu: [{
+				id: MenuId.EditorContext,
+				group: 'navigation',
+				order: 1.1
+			}, {
+				id: MenuId.MenubarGoMenu,
+				group: '4_symbol_nav',
+				order: 2,
+			}]
 		});
 		CommandsRegistry.registerCommandAlias('editor.action.openDeclarationToTheSide', OpenDefinitionToSideAction.id);
 	}
