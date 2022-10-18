@@ -277,7 +277,7 @@ const goToDefinitionKb = isWeb && !isStandalone()
 	? KeyMod.CtrlCmd | KeyCode.F12
 	: KeyCode.F12;
 
-registerAction2(class GoToDefinitionInNewTabAction extends DefinitionAction {
+registerAction2(class GoToDefinitionNewTabAction extends DefinitionAction {
 	static readonly id = 'editor.action.revealDefinitionNewTab';
 
 	constructor() {
@@ -286,7 +286,7 @@ registerAction2(class GoToDefinitionInNewTabAction extends DefinitionAction {
 			openInPeek: false,
 			muteMessage: false
 		}, {
-			id: GoToDefinitionInNewTabAction.id,
+			id: GoToDefinitionNewTabAction.id,
 			title: {
 				value: nls.localize('actions.goToDeclNewTab.label', "Go to Definition / New Tab"),
 				original: 'Go to Definition/New Tab',
@@ -310,7 +310,7 @@ registerAction2(class GoToDefinitionInNewTabAction extends DefinitionAction {
 				order: 2,
 			}]
 		});
-		CommandsRegistry.registerCommandAlias('editor.action.revealDefinitionNewTab', GoToDefinitionInNewTabAction.id);
+		CommandsRegistry.registerCommandAlias('editor.action.revealDefinitionNewTab', GoToDeinitionNewTabAction.id);
 	}
 });
 
