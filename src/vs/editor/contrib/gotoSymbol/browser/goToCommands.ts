@@ -310,7 +310,7 @@ registerAction2(class GoToDefinitionNewTabAction extends DefinitionAction {
 				order: 2,
 			}]
 		});
-		CommandsRegistry.registerCommandAlias('editor.action.revealDefinitionNewTab', GoToDeinitionNewTabAction.id);
+		CommandsRegistry.registerCommandAlias('editor.action.revealDefinitionNewTab', GoToDefinitionNewTabAction.id);
 	}
 });
 
