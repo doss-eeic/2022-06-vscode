@@ -7,7 +7,7 @@ import { isStandalone } from 'vs/base/browser/browser';
 import { alert } from 'vs/base/browser/ui/aria/aria';
 import { createCancelablePromise, raceCancellation } from 'vs/base/common/async';
 import { CancellationToken } from 'vs/base/common/cancellation';
-import { KeyChord, KeyCode, KeyMod } from 'vs/base/common/keyCodes';
+import { KeyCode, KeyMod } from 'vs/base/common/keyCodes';
 import { isWeb } from 'vs/base/common/platform';
 import { assertType } from 'vs/base/common/types';
 import { URI } from 'vs/base/common/uri';
@@ -336,7 +336,7 @@ registerAction2(class OpenDefinitionToSideAction extends DefinitionAction {
 				EditorContextKeys.isInWalkThroughSnippet.toNegated()),
 			keybinding: {
 				when: EditorContextKeys.editorTextFocus,
-				primary: KeyChord(KeyMod.CtrlCmd | KeyCode.KeyK, goToDefinitionKb),
+				primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyK,
 				weight: KeybindingWeight.EditorContrib
 			},
 			menu: [{
