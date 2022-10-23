@@ -196,7 +196,7 @@ import 'vs/workbench/contrib/searchEditor/browser/searchEditor.contribution';
 
 // View Tree
 import 'vs/workbench/contrib/sourceTree/browser/sourceTree.contribution';
-
+import 'vs/workbench/contrib/sourceTree/browser/sourceTreeView';
 
 // Sash
 import 'vs/workbench/contrib/sash/browser/sash.contribution';
