@@ -57,6 +57,12 @@ export function setup() {
 			await terminal.assertEditorGroupCount(2);
 		});
 
+		it('should open a terminal in a new group for view tree', async () => {
+			await terminal.runCommand(TerminalCommandId.CreateNewEditor);
+			await terminal.runCommand(TerminalCommandId.SplitEditor);
+			await terminal.assertEditorGroupCount(2);
+		});
+
 		it('should open a terminal in a new group when the split button is pressed', async () => {
 			await terminal.runCommand(TerminalCommandId.CreateNewEditor);
 			await terminal.clickSplitButton();
