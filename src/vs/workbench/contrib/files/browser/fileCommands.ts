@@ -120,34 +120,7 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 	weight: KeybindingWeight.WorkbenchContrib,
 	when: ExplorerFocusCondition,
 	id: VIEW_TREE_COMMAND_ID, handler: async (accessor, resource: URI | object) => {
-		const editorService = accessor.get(IEditorService);
-		const listService = accessor.get(IListService);
-		const fileService = accessor.get(IFileService);
-		const explorerService = accessor.get(IExplorerService);
-		const resources = getMultiSelectedResources(resource, listService, editorService, explorerService);
-
-		// Set side input
-		if (resources.length) {
-			const untitledResources = resources.filter(resource => resource.scheme === Schemas.untitled);
-			const fileResources = resources.filter(resource => resource.scheme !== Schemas.untitled);
-
-			const items = await Promise.all(fileResources.map(async resource => {
-				const item = explorerService.findClosest(resource);
-				if (item) {
-					// Explorer already resolved the item, no need to go to the file service #109780
-					return item;
-				}
-
-				return await fileService.stat(resource);
-			}));
-			const files = items.filter(i => !i.isDirectory);
-			const editors = files.map(f => ({
-				resource: f.resource,
-				options: { pinned: true }
-			})).concat(...untitledResources.map(untitledResource => ({ resource: untitledResource, options: { pinned: true } })));
-
-			await editorService.openEditors(editors, SIDE_GROUP);
-		}
+		// do nothing
 	}
 });
 
