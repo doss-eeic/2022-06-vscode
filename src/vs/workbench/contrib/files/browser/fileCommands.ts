@@ -119,10 +119,6 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 KeybindingsRegistry.registerCommandAndKeybindingRule({
 	weight: KeybindingWeight.WorkbenchContrib,
 	when: ExplorerFocusCondition,
-	primary: KeyMod.CtrlCmd | KeyCode.Enter,
-	mac: {
-		primary: KeyMod.WinCtrl | KeyCode.Enter
-	},
 	id: VIEW_TREE_COMMAND_ID, handler: async (accessor, resource: URI | object) => {
 		const editorService = accessor.get(IEditorService);
 		const listService = accessor.get(IListService);
