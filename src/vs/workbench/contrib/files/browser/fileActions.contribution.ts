@@ -215,6 +215,7 @@ const openToSideCommand = {
 	id: OPEN_TO_SIDE_COMMAND_ID,
 	title: nls.localize('openToSide', "Open to the Side")
 };
+
 const viewTreeCommand = {
 	id: VIEW_TREE_COMMAND_ID,
 	title: nls.localize('viewTree', "View Tree")
@@ -229,7 +230,7 @@ MenuRegistry.appendMenuItem(MenuId.OpenEditorsContext, {
 
 MenuRegistry.appendMenuItem(MenuId.OpenEditorsContext, {
 	group: 'navigation',
-	order: 20,
+	order: 10,
 	command: viewTreeCommand,
 	when: isFileOrUntitledResourceContextKey
 });
@@ -423,6 +424,13 @@ MenuRegistry.appendMenuItem(MenuId.ExplorerContext, {
 	group: 'navigation',
 	order: 10,
 	command: openToSideCommand,
+	when: ContextKeyExpr.and(ExplorerFolderContext.toNegated(), ResourceContextKey.HasResource)
+});
+
+MenuRegistry.appendMenuItem(MenuId.ExplorerContext, {
+	group: 'navigation',
+	order: 10,
+	command: viewTreeCommand,
 	when: ContextKeyExpr.and(ExplorerFolderContext.toNegated(), ResourceContextKey.HasResource)
 });
 
