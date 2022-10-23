@@ -47,7 +47,7 @@ import { hash } from 'vs/base/common/hash';
 import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
 import { IPaneCompositePartService } from 'vs/workbench/services/panecomposite/browser/panecomposite';
 import { ViewContainerLocation } from 'vs/workbench/common/views';
-import { OPEN_TO_SIDE_COMMAND_ID, COMPARE_WITH_SAVED_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, COMPARE_SELECTED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, COPY_PATH_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_WITH_EXPLORER_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_AS_COMMAND_ID, SAVE_ALL_COMMAND_ID, SAVE_ALL_IN_GROUP_COMMAND_ID, SAVE_FILES_COMMAND_ID, REVERT_FILE_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, PREVIOUS_COMPRESSED_FOLDER, NEXT_COMPRESSED_FOLDER, FIRST_COMPRESSED_FOLDER, LAST_COMPRESSED_FOLDER, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL, NEW_FILE_COMMAND_ID } from './fileConstants';
+import { OPEN_TO_SIDE_COMMAND_ID, VIEW_TREE_COMMAND_ID, COMPARE_WITH_SAVED_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, COMPARE_SELECTED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, COPY_PATH_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_WITH_EXPLORER_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_AS_COMMAND_ID, SAVE_ALL_COMMAND_ID, SAVE_ALL_IN_GROUP_COMMAND_ID, SAVE_FILES_COMMAND_ID, REVERT_FILE_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, PREVIOUS_COMPRESSED_FOLDER, NEXT_COMPRESSED_FOLDER, FIRST_COMPRESSED_FOLDER, LAST_COMPRESSED_FOLDER, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL, NEW_FILE_COMMAND_ID } from './fileConstants';
 import { IFileDialogService } from 'vs/platform/dialogs/common/dialogs';
 
 export const openWindowCommand = (accessor: ServicesAccessor, toOpen: IWindowOpenable[], options?: IOpenWindowOptions) => {
@@ -85,6 +85,41 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 		primary: KeyMod.WinCtrl | KeyCode.Enter
 	},
 	id: OPEN_TO_SIDE_COMMAND_ID, handler: async (accessor, resource: URI | object) => {
+		const editorService = accessor.get(IEditorService);
+		const listService = accessor.get(IListService);
+		const fileService = accessor.get(IFileService);
+		const explorerService = accessor.get(IExplorerService);
+		const resources = getMultiSelectedResources(resource, listService, editorService, explorerService);
+
+		// Set side input
+		if (resources.length) {
+			const untitledResources = resources.filter(resource => resource.scheme === Schemas.untitled);
+			const fileResources = resources.filter(resource => resource.scheme !== Schemas.untitled);
+
+			const items = await Promise.all(fileResources.map(async resource => {
+				const item = explorerService.findClosest(resource);
+				if (item) {
+					// Explorer already resolved the item, no need to go to the file service #109780
+					return item;
+				}
+
+				return await fileService.stat(resource);
+			}));
+			const files = items.filter(i => !i.isDirectory);
+			const editors = files.map(f => ({
+				resource: f.resource,
+				options: { pinned: true }
+			})).concat(...untitledResources.map(untitledResource => ({ resource: untitledResource, options: { pinned: true } })));
+
+			await editorService.openEditors(editors, SIDE_GROUP);
+		}
+	}
+});
+
+KeybindingsRegistry.registerCommandAndKeybindingRule({
+	weight: KeybindingWeight.WorkbenchContrib,
+	when: ExplorerFocusCondition,
+	id: VIEW_TREE_COMMAND_ID, handler: async (accessor, resource: URI | object) => {
 		const editorService = accessor.get(IEditorService);
 		const listService = accessor.get(IListService);
 		const fileService = accessor.get(IFileService);
