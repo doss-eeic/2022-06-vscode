@@ -9,11 +9,11 @@ import { ViewPaneContainer } from 'vs/workbench/browser/parts/views/viewPaneCont
 import { Extensions as ViewExtensions, IViewContainersRegistry, IViewDescriptor, IViewDescriptorService, IViewsRegistry, ViewContainerLocation } from 'vs/workbench/common/views';
 import { sourceTreeIcon } from 'vs/workbench/contrib/sourceTree/browser/sourceTreeIcons';
 import { SourceTreeView } from 'vs/workbench/contrib/sourceTree/browser/sourceTreeView';
-import { WelcomeView } from 'vs/workbench/contrib/sourceTree/browser/welcomeView';
+// import { WelcomeView } from 'vs/workbench/contrib/sourceTree/browser/welcomeView';
 import { VIEWLET_ID, VIEW_ID } from 'vs/workbench/contrib/sourceTree/common/sourceTree';
 
 const viewContainerRegistry = Registry.as<IViewContainersRegistry>(ViewExtensions.ViewContainersRegistry);
-const viewsRegistry = Registry.as<IViewsRegistry>(ViewExtensions.ViewsRegistry);
+// const viewsRegistry = Registry.as<IViewsRegistry>(ViewExtensions.ViewsRegistry);
 
 const viewContainer = viewContainerRegistry.registerViewContainer({
 	id: VIEWLET_ID,
