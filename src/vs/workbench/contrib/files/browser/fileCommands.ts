@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
+import * as fs from 'fs';
 import * as nls from 'vs/nls';
 import { URI } from 'vs/base/common/uri';
 import { EditorResourceAccessor, IEditorCommandsContext, SideBySideEditor, IEditorIdentifier, SaveReason, EditorsOrder, EditorInputCapabilities } from 'vs/workbench/common/editor';
@@ -35,7 +35,7 @@ import { ILabelService } from 'vs/platform/label/common/label';
 import { basename, joinPath, isEqual } from 'vs/base/common/resources';
 import { IDisposable, dispose } from 'vs/base/common/lifecycle';
 import { IEnvironmentService } from 'vs/platform/environment/common/environment';
-import { coalesce } from 'vs/base/common/arrays';
+import { binarySearch, coalesce } from 'vs/base/common/arrays';
 import { ICodeEditorService } from 'vs/editor/browser/services/codeEditorService';
 import { EmbeddedCodeEditorWidget } from 'vs/editor/browser/widget/embeddedCodeEditorWidget';
 import { ITextFileService } from 'vs/workbench/services/textfile/common/textfiles';
@@ -116,11 +116,72 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 	}
 });
 
+const dataURItoBlob = (dataURI: URI): Uint8Array => {
+	// ここの関数を変える
+	// 目的: URI型の変数dataURIを、fs.writeFileの引数に入れられるような型に変換
+	const binaryString = dataURI.toString();
+	const len = binaryString.length;
+	const bytes = new Uint8Array(len);
+	for (let i = 0; i < len; i++) {
+		bytes[i] = binaryString.charCodeAt(i);
+	}
+	return bytes;
+};
+
+const writeUriToFile = (filePath: string, dataURI: URI) => {
+	const dataBlob = dataURItoBlob(dataURI);
+	fs.writeFile(filePath, dataBlob, {}, (err) => {
+		// do nothing
+	});
+
+};
+
 KeybindingsRegistry.registerCommandAndKeybindingRule({
 	weight: KeybindingWeight.WorkbenchContrib,
 	when: ExplorerFocusCondition,
 	id: VIEW_TREE_COMMAND_ID, handler: async (accessor, resource: URI | object) => {
-		// do nothing
+		// open side to show tree
+		const editorService = accessor.get(IEditorService);
+		const listService = accessor.get(IListService);
+		const fileService = accessor.get(IFileService);
+		const explorerService = accessor.get(IExplorerService);
+		const resources = getMultiSelectedResources(resource, listService, editorService, explorerService);
+
+		// Set side input
+		if (resources.length) {
+			const untitledResources = resources.filter(resource => resource.scheme === Schemas.untitled);
+			const fileResources = resources.filter(resource => resource.scheme !== Schemas.untitled);
+
+			const items = await Promise.all(fileResources.map(async resource => {
+				const item = explorerService.findClosest(resource);
+				if (item) {
+					// Explorer already resolved the item, no need to go to the file service #109780
+					return item;
+				}
+
+				return await fileService.stat(resource);
+			}));
+			const files = items.filter(i => !i.isDirectory);
+			const file = files[0];
+			if (file === undefined) {
+				console.log('undefined found');
+			}
+			if (file !== undefined) {
+				const filepath = '/home/denjo/2022-06-vscode/output.ts';
+				writeUriToFile(filepath, file.resource);
+
+			}
+			const editors_new = [file];
+			console.log('checkpoint 1');
+
+
+			// const editors_new = files.map(f => ({
+			// 	resource: f.resource,
+			// 	options: { pinned: true }
+			// })).concat(...untitledResources.map(untitledResource => ({ resource: untitledResource, options: { pinned: true } })));
+
+			await editorService.openEditors(editors_new, SIDE_GROUP);
+		}
 	}
 });
 
