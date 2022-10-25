@@ -49,6 +49,7 @@ import { IPaneCompositePartService } from 'vs/workbench/services/panecomposite/b
 import { ViewContainerLocation } from 'vs/workbench/common/views';
 import { OPEN_TO_SIDE_COMMAND_ID, VIEW_TREE_COMMAND_ID, COMPARE_WITH_SAVED_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, COMPARE_SELECTED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, COPY_PATH_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_WITH_EXPLORER_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_AS_COMMAND_ID, SAVE_ALL_COMMAND_ID, SAVE_ALL_IN_GROUP_COMMAND_ID, SAVE_FILES_COMMAND_ID, REVERT_FILE_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, PREVIOUS_COMPRESSED_FOLDER, NEXT_COMPRESSED_FOLDER, FIRST_COMPRESSED_FOLDER, LAST_COMPRESSED_FOLDER, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL, NEW_FILE_COMMAND_ID } from './fileConstants';
 import { IFileDialogService } from 'vs/platform/dialogs/common/dialogs';
+import { extractDef } from 'vs/workbench/contrib/files/browser/pickup';
 
 export const openWindowCommand = (accessor: ServicesAccessor, toOpen: IWindowOpenable[], options?: IOpenWindowOptions) => {
 	if (Array.isArray(toOpen)) {
@@ -116,26 +117,6 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 	}
 });
 
-const dataURItoBlob = (dataURI: URI): Uint8Array => {
-	// ここの関数を変える
-	// 目的: URI型の変数dataURIを、fs.writeFileの引数に入れられるような型に変換
-	const binaryString = dataURI.toString();
-	const len = binaryString.length;
-	const bytes = new Uint8Array(len);
-	for (let i = 0; i < len; i++) {
-		bytes[i] = binaryString.charCodeAt(i);
-	}
-	return bytes;
-};
-
-const writeUriToFile = (filePath: string, dataURI: URI) => {
-	const dataBlob = dataURItoBlob(dataURI);
-	fs.writeFile(filePath, dataBlob, {}, (err) => {
-		// do nothing
-	});
-
-};
-
 KeybindingsRegistry.registerCommandAndKeybindingRule({
 	weight: KeybindingWeight.WorkbenchContrib,
 	when: ExplorerFocusCondition,
@@ -164,21 +145,20 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 			const files = items.filter(i => !i.isDirectory);
 			const file = files[0];
 			if (file === undefined) {
-				console.log('undefined found');
+			} else {
+				const filePath = file.resource.fsPath;
+				// generate function list file
+				const funcList = extractDef(filePath);
+				let funcListString: string = '';
+				for (const line of funcList) {
+					funcListString = funcListString + line;
+				}
+				console.log(funcListString);
+				console.log(funcList);
+				fs.writeFile(filePath + '.functionList.text', funcListString, (err) => console.log(err));
 			}
-			if (file !== undefined) {
-				const filepath = '/home/denjo/2022-06-vscode/output.ts';
-				writeUriToFile(filepath, file.resource);
 
-			}
 			const editors_new = [file];
-			console.log('checkpoint 1');
-
-
-			// const editors_new = files.map(f => ({
-			// 	resource: f.resource,
-			// 	options: { pinned: true }
-			// })).concat(...untitledResources.map(untitledResource => ({ resource: untitledResource, options: { pinned: true } })));
 
 			await editorService.openEditors(editors_new, SIDE_GROUP);
 		}
@@ -782,3 +762,7 @@ CommandsRegistry.registerCommand({
 		});
 	}
 });
+function generateFunctionList(filePath: string) {
+	throw new Error('Function not implemented.');
+}
+
