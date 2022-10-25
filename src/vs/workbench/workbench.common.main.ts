@@ -194,6 +194,10 @@ import 'vs/workbench/contrib/search/browser/searchView';
 // Search Editor
 import 'vs/workbench/contrib/searchEditor/browser/searchEditor.contribution';
 
+// Bookmark
+import 'vs/workbench/contrib/bookmark/browser/bookmark.contribution';
+import 'vs/workbench/contrib/bookmark/browser/views/bookmarkView';
+
 // Sash
 import 'vs/workbench/contrib/sash/browser/sash.contribution';
 

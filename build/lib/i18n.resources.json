@@ -477,6 +477,10 @@
 		{
 			"name": "vs/workbench/services/userDataProfile",
 			"project": "vscode-profiles"
+		},
+		{
+			"name": "vs/workbench/contrib/bookmark",
+			"project": "vscode-bookmark"
 		}
 	]
 }
