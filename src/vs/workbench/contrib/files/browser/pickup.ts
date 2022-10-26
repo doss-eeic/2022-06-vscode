@@ -18,10 +18,10 @@ class DeclItem {
 	private readonly _text: string;
 	public readonly depth: number = 0;
 	constructor(
-		private readonly parent: DeclItem | undefined,
-		private readonly type: DeclareType,
-		private readonly spaces: number,
-		private readonly text: string,
+		readonly parent: DeclItem | undefined,
+		readonly type: DeclareType,
+		readonly spaces: number,
+		readonly text: string,
 	) {
 		this._parent = parent;
 		this._type = type;

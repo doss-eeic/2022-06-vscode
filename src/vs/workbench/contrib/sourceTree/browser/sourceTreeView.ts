@@ -22,7 +22,6 @@ import { ILabelService } from 'vs/platform/label/common/label';
 export class SourceTreeView extends ViewPane {
 	private activeFile: URI | undefined;
 	// private activeEditor: EditorInput;
-	private container!: HTMLElement;
 	constructor(
 		options: IViewPaneOptions,
 		@IKeybindingService keybindingService: IKeybindingService,
@@ -72,9 +71,6 @@ export class SourceTreeView extends ViewPane {
 
 	override renderBody(container: HTMLElement): void {
 		super.renderBody(container);
-
-		this.container = container;
-
 		// When the active file changes, update the view
 		this._register(this.editorService.onDidActiveEditorChange(() => {
 			this.selectActiveFile();
