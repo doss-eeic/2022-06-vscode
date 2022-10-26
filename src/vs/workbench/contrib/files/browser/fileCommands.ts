@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
+import * as fs from 'fs';
 import * as nls from 'vs/nls';
 import { URI } from 'vs/base/common/uri';
 import { EditorResourceAccessor, IEditorCommandsContext, SideBySideEditor, IEditorIdentifier, SaveReason, EditorsOrder, EditorInputCapabilities } from 'vs/workbench/common/editor';
@@ -49,6 +49,7 @@ import { IPaneCompositePartService } from 'vs/workbench/services/panecomposite/b
 import { ViewContainerLocation } from 'vs/workbench/common/views';
 import { OPEN_TO_SIDE_COMMAND_ID, VIEW_TREE_COMMAND_ID, COMPARE_WITH_SAVED_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, COMPARE_SELECTED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, COPY_PATH_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_WITH_EXPLORER_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_AS_COMMAND_ID, SAVE_ALL_COMMAND_ID, SAVE_ALL_IN_GROUP_COMMAND_ID, SAVE_FILES_COMMAND_ID, REVERT_FILE_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, PREVIOUS_COMPRESSED_FOLDER, NEXT_COMPRESSED_FOLDER, FIRST_COMPRESSED_FOLDER, LAST_COMPRESSED_FOLDER, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL, NEW_FILE_COMMAND_ID } from './fileConstants';
 import { IFileDialogService } from 'vs/platform/dialogs/common/dialogs';
+import { extractDef } from 'vs/workbench/contrib/files/browser/pickup';
 
 export const openWindowCommand = (accessor: ServicesAccessor, toOpen: IWindowOpenable[], options?: IOpenWindowOptions) => {
 	if (Array.isArray(toOpen)) {
@@ -120,6 +121,7 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 	weight: KeybindingWeight.WorkbenchContrib,
 	when: ExplorerFocusCondition,
 	id: VIEW_TREE_COMMAND_ID, handler: async (accessor, resource: URI | object) => {
+		// open side to show tree
 		const editorService = accessor.get(IEditorService);
 		const listService = accessor.get(IListService);
 		const fileService = accessor.get(IFileService);
@@ -128,7 +130,6 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 
 		// Set side input
 		if (resources.length) {
-			const untitledResources = resources.filter(resource => resource.scheme === Schemas.untitled);
 			const fileResources = resources.filter(resource => resource.scheme !== Schemas.untitled);
 
 			const items = await Promise.all(fileResources.map(async resource => {
@@ -141,12 +142,31 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 				return await fileService.stat(resource);
 			}));
 			const files = items.filter(i => !i.isDirectory);
-			const editors = files.map(f => ({
-				resource: f.resource,
-				options: { pinned: true }
-			})).concat(...untitledResources.map(untitledResource => ({ resource: untitledResource, options: { pinned: true } })));
+			const file = files[0];
+			if (file === undefined) {
+			} else {
+				const filePath = file.resource.fsPath;
+				const funcListPath = filePath + '.functionList.text';
+				console.log(`filePath: ${filePath}`);
+				// generate function list file
 
-			await editorService.openEditors(editors, SIDE_GROUP);
+				// fs.writeFileSync(funcListPath, '');
+				const funcList = extractDef(filePath);
+				console.log(`funcList: ${funcList}`);
+
+				// write file list file
+				fs.writeFileSync(funcListPath, '');
+				const writeStream = fs.createWriteStream(funcListPath);
+				for (const line of funcList) {
+					writeStream.write(line + '\n');
+				}
+
+				writeStream.end();
+			}
+
+			const editors_new = [file];
+
+			await editorService.openEditors(editors_new, SIDE_GROUP);
 		}
 	}
 });
@@ -748,3 +768,4 @@ CommandsRegistry.registerCommand({
 		});
 	}
 });
+
