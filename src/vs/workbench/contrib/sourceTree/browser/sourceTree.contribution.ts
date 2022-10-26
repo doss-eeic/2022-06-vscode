@@ -6,7 +6,7 @@ import { localize } from 'vs/nls';
 import { SyncDescriptor } from 'vs/platform/instantiation/common/descriptors';
 import { Registry } from 'vs/platform/registry/common/platform';
 import { ViewPaneContainer } from 'vs/workbench/browser/parts/views/viewPaneContainer';
-import { Extensions as ViewExtensions, IViewContainersRegistry, IViewDescriptor, IViewDescriptorService, IViewsRegistry, ViewContainerLocation } from 'vs/workbench/common/views';
+import { Extensions as ViewExtensions, IViewContainersRegistry, IViewDescriptor, IViewsRegistry, ViewContainerLocation } from 'vs/workbench/common/views';
 import { sourceTreeIcon } from 'vs/workbench/contrib/sourceTree/browser/sourceTreeIcons';
 import { SourceTreeView } from 'vs/workbench/contrib/sourceTree/browser/sourceTreeView';
 // import { WelcomeView } from 'vs/workbench/contrib/sourceTree/browser/welcomeView';

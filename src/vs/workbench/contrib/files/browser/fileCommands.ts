@@ -141,32 +141,51 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 
 				return await fileService.stat(resource);
 			}));
-			const files = items.filter(i => !i.isDirectory);
-			const file = files[0];
-			if (file === undefined) {
-			} else {
-				const filePath = file.resource.fsPath;
-				const funcListPath = filePath + '.functionList.text';
-				console.log(`filePath: ${filePath}`);
-				// generate function list file
+			const originalFiles = items.filter(i => !i.isDirectory);
+			const formattedResources = [] as URI[];
+			for (const file of originalFiles) {
+				if (file === undefined) {
+				} else {
+					const filePath = file.resource.fsPath;
+					const funcListPath = filePath + '.functionList.text';
+					// generate function list file
+					const { classList, functionList: funcList } = extractDef(filePath);
 
-				// fs.writeFileSync(funcListPath, '');
-				const funcList = extractDef(filePath);
-				console.log(`funcList: ${funcList}`);
+					// write file list file
+					fs.writeFileSync(funcListPath, '');
+					const writeStream = fs.createWriteStream(funcListPath);
 
-				// write file list file
-				fs.writeFileSync(funcListPath, '');
-				const writeStream = fs.createWriteStream(funcListPath);
-				for (const line of funcList) {
-					writeStream.write(line + '\n');
+					// write class list
+					writeStream.write('[method]\n');
+					for (const line of funcList) {
+						writeStream.write(line + '\n');
+					}
+
+					writeStream.write('\n[class]\n');
+					for (const classLine of classList) {
+						writeStream.write(classLine + '\n');
+					}
+
+					writeStream.end();
+					formattedResources.push(URI.file(funcListPath));
+				}
+			}
+			const formattedItems = await Promise.all(formattedResources.map(async resource => {
+				const item = explorerService.findClosest(resource);
+				if (item) {
+					// Explorer already resolved the item, no need to go to the file service #109780
+					return item;
 				}
 
-				writeStream.end();
-			}
+				return await fileService.stat(resource);
+			}));
+			const formattedFiles = formattedItems.filter(i => !i.isDirectory);
+			const formattedEditors = formattedFiles.map(f => ({
+				resource: f.resource,
+				options: { pinned: true }
+			}));
 
-			const editors_new = [file];
-
-			await editorService.openEditors(editors_new, SIDE_GROUP);
+			await editorService.openEditors(formattedEditors, SIDE_GROUP);
 		}
 	}
 });
