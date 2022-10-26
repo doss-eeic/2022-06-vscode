@@ -162,7 +162,7 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 						writeStream.write(classLine + '\n');
 					}
 
-					writeStream.write('\n[function]\n');
+					writeStream.write('\n[method]\n');
 
 					for (const line of funcList) {
 						writeStream.write(line + '\n');
