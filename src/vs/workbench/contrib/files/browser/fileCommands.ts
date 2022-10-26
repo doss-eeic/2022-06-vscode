@@ -151,12 +151,20 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 					const funcListPath = filePath + '.functionList.text';
 					console.log(`filePath: ${filePath}`);
 					// generate function list file
-					const funcList = extractDef(filePath);
-					console.log(`funcList: ${funcList}`);
+					const { classList, functionList: funcList } = extractDef(filePath);
 
 					// write file list file
 					fs.writeFileSync(funcListPath, '');
 					const writeStream = fs.createWriteStream(funcListPath);
+
+					// write class list
+					writeStream.write('[class]\n');
+					for (const classLine of classList) {
+						writeStream.write(classLine + '\n');
+					}
+
+					writeStream.write('\n[function]\n');
+
 					for (const line of funcList) {
 						writeStream.write(line + '\n');
 					}
