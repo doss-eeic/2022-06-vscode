@@ -156,12 +156,12 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 					const writeStream = fs.createWriteStream(funcListPath);
 
 					// write class list
-					writeStream.write('\n[method]\n');
+					writeStream.write('[method]\n');
 					for (const line of funcList) {
 						writeStream.write(line + '\n');
 					}
 
-					writeStream.write('[class]\n');
+					writeStream.write('\n[class]\n');
 					for (const classLine of classList) {
 						writeStream.write(classLine + '\n');
 					}
