@@ -83,10 +83,10 @@ const checkLineType = (line: string): DeclareType | undefined => {
 	return undefined;
 };
 
-const addAllChildren = (parent: DeclItem, list: string[]) => {
-	list.push(parent.title + `(depth ${parent.depth}) has ${parent.children.length} children`);
+const pushAllChildren = (parent: DeclItem, list: string[]) => {
+	list.push(parent.title);
 	for (const child of parent.children) {
-		addAllChildren(child, list);
+		pushAllChildren(child, list);
 	}
 };
 
@@ -97,16 +97,13 @@ export const extractDef = (inputFilePath: string) => {
 	try {
 		fileContent = fs.readFileSync(inputFilePath, 'utf8');
 	} catch (err) {
-		console.log(`Error while reading file: ${err}`);
 	}
 	const lines = fileContent.split('\n');
 	for (const line of lines) {
 		const lineType = checkLineType(line);
-		console.log(`lineType: ${lineType === DeclareType.class ? 'class' : lineType === DeclareType.function ? 'func' : 'undefined'}, line: ${line}`);
 		if (lineType !== undefined) {
 			// functionまたはclassの定義文
 			const spaces = countSpacesAtBeginning(line);
-			console.log(`spaces: ${spaces}`);
 			if (spaces === 0 || currentRoot === undefined) {
 				const newItem = new DeclItem(undefined, lineType, 0, line);
 				roots.push(newItem);
@@ -128,9 +125,9 @@ export const extractDef = (inputFilePath: string) => {
 	const functionList = [] as string[];
 	for (const root of roots) {
 		if (root.itemType === DeclareType.class) {
-			addAllChildren(root, classList);
+			pushAllChildren(root, classList);
 		} else {
-			addAllChildren(root, functionList);
+			pushAllChildren(root, functionList);
 		}
 	}
 	return {

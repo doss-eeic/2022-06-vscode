@@ -149,7 +149,6 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 				} else {
 					const filePath = file.resource.fsPath;
 					const funcListPath = filePath + '.functionList.text';
-					console.log(`filePath: ${filePath}`);
 					// generate function list file
 					const { classList, functionList: funcList } = extractDef(filePath);
 
