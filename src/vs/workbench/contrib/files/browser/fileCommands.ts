@@ -50,6 +50,7 @@ import { ViewContainerLocation } from 'vs/workbench/common/views';
 import { OPEN_TO_SIDE_COMMAND_ID, VIEW_TREE_COMMAND_ID, COMPARE_WITH_SAVED_COMMAND_ID, SELECT_FOR_COMPARE_COMMAND_ID, ResourceSelectedForCompareContext, COMPARE_SELECTED_COMMAND_ID, COMPARE_RESOURCE_COMMAND_ID, COPY_PATH_COMMAND_ID, COPY_RELATIVE_PATH_COMMAND_ID, REVEAL_IN_EXPLORER_COMMAND_ID, OPEN_WITH_EXPLORER_COMMAND_ID, SAVE_FILE_COMMAND_ID, SAVE_FILE_WITHOUT_FORMATTING_COMMAND_ID, SAVE_FILE_AS_COMMAND_ID, SAVE_ALL_COMMAND_ID, SAVE_ALL_IN_GROUP_COMMAND_ID, SAVE_FILES_COMMAND_ID, REVERT_FILE_COMMAND_ID, REMOVE_ROOT_FOLDER_COMMAND_ID, PREVIOUS_COMPRESSED_FOLDER, NEXT_COMPRESSED_FOLDER, FIRST_COMPRESSED_FOLDER, LAST_COMPRESSED_FOLDER, NEW_UNTITLED_FILE_COMMAND_ID, NEW_UNTITLED_FILE_LABEL, NEW_FILE_COMMAND_ID } from './fileConstants';
 import { IFileDialogService } from 'vs/platform/dialogs/common/dialogs';
 import { extractDef } from 'vs/workbench/contrib/files/browser/pickup';
+import { ExplorerItem } from 'vs/workbench/contrib/files/common/explorerModel';
 
 export const openWindowCommand = (accessor: ServicesAccessor, toOpen: IWindowOpenable[], options?: IOpenWindowOptions) => {
 	if (Array.isArray(toOpen)) {
@@ -141,32 +142,45 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 
 				return await fileService.stat(resource);
 			}));
-			const files = items.filter(i => !i.isDirectory);
-			const file = files[0];
-			if (file === undefined) {
-			} else {
-				const filePath = file.resource.fsPath;
-				const funcListPath = filePath + '.functionList.text';
-				console.log(`filePath: ${filePath}`);
-				// generate function list file
+			const originalFiles = items.filter(i => !i.isDirectory);
+			const formattedResources = [] as URI[];
+			for (const file of originalFiles) {
+				if (file === undefined) {
+				} else {
+					const filePath = file.resource.fsPath;
+					const funcListPath = filePath + '.functionList.text';
+					console.log(`filePath: ${filePath}`);
+					// generate function list file
+					const funcList = extractDef(filePath);
+					console.log(`funcList: ${funcList}`);
 
-				// fs.writeFileSync(funcListPath, '');
-				const funcList = extractDef(filePath);
-				console.log(`funcList: ${funcList}`);
+					// write file list file
+					fs.writeFileSync(funcListPath, '');
+					const writeStream = fs.createWriteStream(funcListPath);
+					for (const line of funcList) {
+						writeStream.write(line + '\n');
+					}
 
-				// write file list file
-				fs.writeFileSync(funcListPath, '');
-				const writeStream = fs.createWriteStream(funcListPath);
-				for (const line of funcList) {
-					writeStream.write(line + '\n');
+					writeStream.end();
+					formattedResources.push(URI.file(funcListPath));
+				}
+			}
+			const formattedItems = await Promise.all(formattedResources.map(async resource => {
+				const item = explorerService.findClosest(resource);
+				if (item) {
+					// Explorer already resolved the item, no need to go to the file service #109780
+					return item;
 				}
 
-				writeStream.end();
-			}
+				return await fileService.stat(resource);
+			}));
+			const formattedFiles = formattedItems.filter(i => !i.isDirectory);
+			const formattedEditors = formattedFiles.map(f => ({
+				resource: f.resource,
+				options: { pinned: true }
+			}));
 
-			const editors_new = [file];
-
-			await editorService.openEditors(editors_new, SIDE_GROUP);
+			await editorService.openEditors(formattedEditors, SIDE_GROUP);
 		}
 	}
 });
