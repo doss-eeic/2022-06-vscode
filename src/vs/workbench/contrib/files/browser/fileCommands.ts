@@ -35,7 +35,7 @@ import { ILabelService } from 'vs/platform/label/common/label';
 import { basename, joinPath, isEqual } from 'vs/base/common/resources';
 import { IDisposable, dispose } from 'vs/base/common/lifecycle';
 import { IEnvironmentService } from 'vs/platform/environment/common/environment';
-import { binarySearch, coalesce } from 'vs/base/common/arrays';
+import { coalesce } from 'vs/base/common/arrays';
 import { ICodeEditorService } from 'vs/editor/browser/services/codeEditorService';
 import { EmbeddedCodeEditorWidget } from 'vs/editor/browser/widget/embeddedCodeEditorWidget';
 import { ITextFileService } from 'vs/workbench/services/textfile/common/textfiles';
@@ -130,7 +130,6 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 
 		// Set side input
 		if (resources.length) {
-			const untitledResources = resources.filter(resource => resource.scheme === Schemas.untitled);
 			const fileResources = resources.filter(resource => resource.scheme !== Schemas.untitled);
 
 			const items = await Promise.all(fileResources.map(async resource => {
@@ -147,15 +146,22 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
 			if (file === undefined) {
 			} else {
 				const filePath = file.resource.fsPath;
+				const funcListPath = filePath + '.functionList.text';
+				console.log(`filePath: ${filePath}`);
 				// generate function list file
+
+				// fs.writeFileSync(funcListPath, '');
 				const funcList = extractDef(filePath);
-				let funcListString: string = '';
+				console.log(`funcList: ${funcList}`);
+
+				// write file list file
+				fs.writeFileSync(funcListPath, '');
+				const writeStream = fs.createWriteStream(funcListPath);
 				for (const line of funcList) {
-					funcListString = funcListString + line;
+					writeStream.write(line + '\n');
 				}
-				console.log(funcListString);
-				console.log(funcList);
-				fs.writeFile(filePath + '.functionList.text', funcListString, (err) => console.log(err));
+
+				writeStream.end();
 			}
 
 			const editors_new = [file];
@@ -762,7 +768,4 @@ CommandsRegistry.registerCommand({
 		});
 	}
 });
-function generateFunctionList(filePath: string) {
-	throw new Error('Function not implemented.');
-}
 
